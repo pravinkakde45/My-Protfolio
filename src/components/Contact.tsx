@@ -9,6 +9,7 @@ export default function Contact() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -20,26 +21,50 @@ export default function Contact() {
     if (!formData.name || !formData.email || !formData.message) return;
 
     setIsSubmitting(true);
-    
-    // Simulate API request
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setErrorMessage("");
 
-    setIsSubmitting(false);
-    setIsSuccess(true);
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/pravinkakde1010@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          _subject: `New Portfolio Message from ${formData.name}`,
+        }),
+      });
 
-    // Launch beautiful cinematic confetti explosion
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ["#00d2ff", "#9d4edd", "#ffffff", "#06b6d4"],
-    });
+      const result = await response.json();
 
-    // Reset form after a delay
-    setTimeout(() => {
-      setFormData({ name: "", email: "", message: "" });
-      setIsSuccess(false);
-    }, 4500);
+      if (response.ok) {
+        setIsSubmitting(false);
+        setIsSuccess(true);
+
+        // Launch beautiful cinematic confetti explosion
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#00d2ff", "#9d4edd", "#ffffff", "#06b6d4"],
+        });
+
+        // Reset form after a delay
+        setTimeout(() => {
+          setFormData({ name: "", email: "", message: "" });
+          setIsSuccess(false);
+        }, 4500);
+      } else {
+        setIsSubmitting(false);
+        setErrorMessage(result.message || "Failed to send the message. Please try again.");
+      }
+    } catch (err) {
+      setIsSubmitting(false);
+      setErrorMessage("Network error! Please check your connection and try again.");
+    }
   };
 
   const contactDetails = [
@@ -222,6 +247,12 @@ export default function Contact() {
                     />
                   </div>
                 </div>
+                {/* Error Message Display */}
+                {errorMessage && (
+                  <div className="text-red-400 text-xs font-semibold text-center p-3 rounded-xl bg-red-500/10 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)] leading-relaxed">
+                    {errorMessage}
+                  </div>
+                )}
 
                 {/* Submit button */}
                 <button
