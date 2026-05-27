@@ -23,6 +23,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       touchMultiplier: 1.5,
     });
 
+    lenis.stop(); // Lock scroll interactions during preloader intro animation
     lenisRef.current = lenis;
     (window as unknown as { lenis: Lenis }).lenis = lenis;
 

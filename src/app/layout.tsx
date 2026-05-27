@@ -6,6 +6,7 @@ import CustomCursor from "@/components/CustomCursor";
 import BackgroundParticles from "@/components/BackgroundParticles";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Preloader from "@/components/Preloader";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -63,6 +64,7 @@ export default function RootLayout({
     >
       <body className="bg-dark-bg text-foreground min-h-full font-sans antialiased select-none">
         <SmoothScroll>
+          <Preloader />
           <BackgroundParticles />
           <CustomCursor />
           <Navbar />
