@@ -3,144 +3,144 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const GREETINGS = [
-  "Hello",        // English
-  "नमस्ते",       // Hindi (Pravin's native context)
-  "Bonjour",      // French
-  "Konnichiwa",   // Japanese
-  "Ciao",         // Italian
-  "Pravin Kakde"  // Final personal brand name
-];
-
 export default function Preloader() {
-  const [index, setIndex] = useState(0);
+  const [isTextDone, setIsTextDone] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [shouldRender, setShouldRender] = useState(true);
-
-  // SVG Curve Morph Path States
-  // As the preloader exits, the bottom tail morphs from a dramatic downward liquid curve to a flat line.
-  const [curvePath, setCurvePath] = useState("M0 0 L100 0 L100 100 Q50 100 0 100 Z");
 
   useEffect(() => {
     // Lock scroll immediately on mount
     document.body.style.overflow = "hidden";
 
-    // Typographic word sequencing rhythm
-    if (index === GREETINGS.length - 1) {
-      // Hold "Pravin Kakde" for a moment, then slide up curtain
-      const holdTimer = setTimeout(() => {
-        setIsComplete(true);
-        
-        // Release scrolling locks
-        document.body.style.overflow = "";
+    // Step 1: Text animation fades out after 1.3 seconds
+    const textTimer = setTimeout(() => {
+      setIsTextDone(true);
+    }, 1300);
 
-        // Trigger Lenis scrolling start securely
-        const lenis = (window as unknown as { lenis?: { start: () => void } }).lenis;
-        if (lenis) {
-          lenis.start();
-        }
+    // Step 2: Shutter panels start sliding up at 1.45 seconds
+    const completeTimer = setTimeout(() => {
+      setIsComplete(true);
+      
+      // Release scrolling locks
+      document.body.style.overflow = "";
 
-        // Fire global completion event to trigger child stagger reveals
-        window.dispatchEvent(new Event("preloaderComplete"));
+      // Trigger Lenis scrolling start securely
+      const lenis = (window as unknown as { lenis?: { start: () => void } }).lenis;
+      if (lenis) {
+        lenis.start();
+      }
 
-        // Wait for exit slide transition to complete before unmounting component
-        setTimeout(() => {
-          setShouldRender(false);
-        }, 1200);
-      }, 1000);
+      // Fire global completion event to trigger home section stagger reveals
+      window.dispatchEvent(new Event("preloaderComplete"));
 
-      return () => clearTimeout(holdTimer);
-    }
+      // Unmount after exit slide transition completes
+      setTimeout(() => {
+        setShouldRender(false);
+      }, 1100);
+    }, 1450);
 
-    const sequenceTimer = setTimeout(() => {
-      setIndex((prev) => prev + 1);
-    }, index === 0 ? 380 : 250); // initial greeting stays slightly longer, rest sequence quickly
-
-    return () => clearTimeout(sequenceTimer);
-  }, [index]);
-
-  // Morph the liquid SVG tail path as exit slide runs
-  useEffect(() => {
-    if (isComplete) {
-      // Start morphing the bottom path Q control coordinate to flat as panel slides
-      const morphTimer = setTimeout(() => {
-        setCurvePath("M0 0 L100 0 L100 0 Q50 0 0 0 Z");
-      }, 100);
-      return () => clearTimeout(morphTimer);
-    }
-  }, [isComplete]);
+    return () => {
+      clearTimeout(textTimer);
+      clearTimeout(completeTimer);
+    };
+  }, []);
 
   if (!shouldRender) return null;
+
+  // Staggered columns animations
+  const columnVariants = {
+    initial: { y: 0 },
+    animate: (i: number) => ({
+      y: "-100%",
+      transition: {
+        duration: 0.85,
+        ease: [0.85, 0, 0.15, 1] as [number, number, number, number],
+        delay: i * 0.1,
+      },
+    }),
+  };
 
   return (
     <AnimatePresence>
       {shouldRender && (
-        <motion.div
-          initial={{ y: 0 }}
-          animate={{ y: isComplete ? "-100vh" : 0 }}
-          transition={{ 
-            duration: 1.0, 
-            ease: [0.76, 0, 0.24, 1], // cinematic bezier
-          }}
-          className="fixed inset-0 w-full h-full bg-[#020011] z-[99999] flex flex-col items-center justify-center select-none overflow-visible"
-        >
-          {/* Subtle cyber grid backdrop */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none opacity-40 z-0" />
+        <div className="fixed inset-0 w-full h-full z-[99999] pointer-events-none select-none overflow-hidden flex">
+          
+          {/* Shutter Panel 1 */}
+          <motion.div
+            custom={0}
+            variants={columnVariants}
+            initial="initial"
+            animate={isComplete ? "animate" : "initial"}
+            className="w-[33.33%] h-full bg-[#020011] relative z-10 border-r border-white/[0.005]"
+          >
+            {/* Subtle grid line backdrop inside panels */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:100%_32px] opacity-35" />
+          </motion.div>
 
-          {/* Dynamic Typographic Display Wrapper */}
-          <div className="relative flex items-center justify-center z-10 overflow-hidden h-24 sm:h-32">
-            <AnimatePresence mode="wait">
+          {/* Shutter Panel 2 */}
+          <motion.div
+            custom={1}
+            variants={columnVariants}
+            initial="initial"
+            animate={isComplete ? "animate" : "initial"}
+            className="w-[33.33%] h-full bg-[#020011] relative z-10 border-r border-white/[0.005]"
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:100%_32px] opacity-35" />
+          </motion.div>
+
+          {/* Shutter Panel 3 */}
+          <motion.div
+            custom={2}
+            variants={columnVariants}
+            initial="initial"
+            animate={isComplete ? "animate" : "initial"}
+            className="w-[33.34%] h-full bg-[#020011] relative z-10"
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:100%_32px] opacity-35" />
+          </motion.div>
+
+          {/* Central Typographic Overlay */}
+          <AnimatePresence>
+            {!isTextDone && (
               <motion.div
-                key={index}
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "-100%", opacity: 0 }}
-                transition={{ 
-                  duration: 0.35, 
-                  ease: [0.215, 0.61, 0.355, 1] // cubic bezier for clean snap-in
-                }}
-                className="flex items-center gap-3.5"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.04 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none"
               >
-                {/* Visual pulse dot for Pravin Kakde name */}
-                {index === GREETINGS.length - 1 && (
-                  <span className="relative flex h-3.5 w-3.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-blue opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-gradient-to-r from-neon-blue to-neon-purple shadow-[0_0_12px_#00d2ff]"></span>
-                  </span>
-                )}
-                
-                {/* Glowing Morph Text */}
-                <h1 className={`font-display font-black tracking-tight text-white uppercase text-center leading-none select-none select-none ${
-                  index === GREETINGS.length - 1 
-                    ? "text-3xl sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-cyan drop-shadow-[0_0_20px_rgba(0,210,255,0.25)]" 
-                    : "text-2xl sm:text-4xl"
-                }`}>
-                  {GREETINGS[index]}
-                </h1>
+                {/* Micro tech sub-string */}
+                <motion.span
+                  initial={{ letterSpacing: "0.2em", opacity: 0 }}
+                  animate={{ letterSpacing: "0.35em", opacity: 0.4 }}
+                  transition={{ duration: 1.0, ease: "easeOut" }}
+                  className="text-[9px] font-black font-sans text-neon-blue uppercase mb-2 select-none"
+                >
+                  SYSTEM CORE INITIALIZED
+                </motion.span>
+
+                {/* Main Typographic Text Reveal */}
+                <motion.h1
+                  initial={{ letterSpacing: "0.08em", opacity: 0 }}
+                  animate={{ letterSpacing: "0.25em", opacity: 1 }}
+                  transition={{ duration: 1.0, ease: "easeOut" }}
+                  className="font-display font-black text-2xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-cyan uppercase leading-none select-none drop-shadow-[0_0_12px_rgba(0,210,255,0.2)]"
+                >
+                  Pravin Kakde
+                </motion.h1>
+
+                {/* Thin loading divider */}
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "100px" }}
+                  transition={{ duration: 1.0, ease: "easeOut" }}
+                  className="h-[1px] bg-gradient-to-r from-neon-blue to-neon-purple mt-4 rounded-full shadow-[0_0_8px_rgba(0,210,255,0.5)]"
+                />
               </motion.div>
-            </AnimatePresence>
-          </div>
+            )}
+          </AnimatePresence>
 
-          {/* SVG Liquid Curve Tail Panel */}
-          {/* Positioned at the bottom edge, it scales dynamically, morphing to flat to simulate real liquid tension as it pulls away */}
-          <div className="absolute top-full left-0 w-full pointer-events-none" style={{ height: "30vh" }}>
-            <svg 
-              className="w-full h-full fill-[#020011] stroke-none" 
-              viewBox="0 0 100 100" 
-              preserveAspectRatio="none"
-            >
-              <motion.path
-                animate={{ d: curvePath }}
-                transition={{ 
-                  duration: 0.95, 
-                  ease: [0.76, 0, 0.24, 1] 
-                }}
-                d="M0 0 L100 0 L100 0 Q50 100 0 0 Z"
-              />
-            </svg>
-          </div>
-
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );
